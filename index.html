@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600&display=swap">
+<title>Registration Practice – Spring 2027</title>
+<style>
+  :root{--navy:#003b70;--navy2:#24497f;--link:#026bc8;--bg:#eef0f3;--frame:#afbcc9;--line:#d5d9df;--ok:#2e7d32;--okbg:#d9f2d0;--err:#c62828;--errbg:#fde3e3;--pend:#8a6d00;--pendbg:#fff3c4}
+  :root{color-scheme:light}
+  *{box-sizing:border-box}
+  input,select,option,textarea{color:#222;background-color:#fff}
+  input::placeholder{color:#999}
+  html,body{margin:0;height:100%}
+  body{font:13px/1.35 Arial,Helvetica,sans-serif;color:#222;background:#fff;display:flex;flex-direction:column;min-height:100vh}
+  button{font:inherit;cursor:pointer}
+  input,select{font:inherit}
+  .topbar{background:var(--navy);color:#fff;height:58px;border-bottom:4px solid #91c6df;display:flex;align-items:center;padding:0 0 0 16px;gap:12px;flex:none;font-family:'Open Sans',Arial,sans-serif}
+  .topbar .east{align-self:stretch;display:flex;align-items:center;gap:10px;background:rgba(21,22,24,.15);padding:0 12px}
+  .topbar .brand{font-size:16px}
+  .pill{background:#ffd54f;color:#3a2b00;border-radius:10px;padding:2px 8px;font-size:11px;font-weight:bold}
+  .topbar .sp{flex:1}
+  .watch{font:600 20px/1 ui-monospace,Menlo,Consolas,monospace;background:rgba(255,255,255,.12);padding:6px 10px;border-radius:4px;min-width:92px;text-align:right}
+  .watch.run{background:#2e5d9e}
+  .watch.done{background:#2e7d32}
+  .tbtn{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:3px;padding:5px 10px}
+  .tbtn:hover{background:rgba(255,255,255,.12)}
+  .crumbs{background:#fff;padding:7px 12px 6px;font:19.2px 'Open Sans',Arial,sans-serif;color:#333;flex:none;height:39px}
+  .crumbs .sep{display:inline-block;width:6px;height:6px;border-radius:50%;background:#c4c4c4;margin:0 12px;vertical-align:middle}
+  .crumbs a{color:var(--link);text-decoration:underline}
+  .crumbs span.cur{color:var(--link)}
+  .h1{font:500 20.8px 'Open Sans',Arial,sans-serif;color:#151618;padding:10px 12px 0;height:47px;background:#f7f7f7;border-bottom:2px solid #eeeeef;flex:none}
+  .main{flex:1;display:flex;flex-direction:column;min-height:0}
+  .frame{background:var(--frame);padding:10px;flex:1;display:flex;flex-direction:column;min-height:0}
+  .card{background:#fff;border-radius:6px;padding:10px;flex:1;overflow:auto}
+  label.f{display:block;font-size:12px;color:#333;margin:10px 10px 0 0;line-height:14px}
+  .sel,.inp{border:1px solid #b2b3b7;border-radius:4px;padding:0 6px;background:#fff;color:#151618;font-size:12px;height:22px}
+  select.sel{height:28px;padding:0 4px 0 8px}
+  #pin{border:1px inset #a2a2a2;width:154px;height:22px;line-height:20px}
+  .btn{background:linear-gradient(#fcfcfc,#d6d8d8);color:#333;border:1px solid #a2a2a2;border-radius:7.2px;padding:6px 24px;height:28px;font:12px Arial,Helvetica,sans-serif;box-shadow:inset 0 1.2px 0 rgba(237,237,237,.7)}
+  .btn:hover{background:linear-gradient(#fefefe,#e0e2e2)}
+  .btn:active{background:linear-gradient(#d6d8d8,#f2f2f2)}
+  .btn:disabled{color:#bbb;border-color:#d0d0d0;background:linear-gradient(#fbfbfb,#ececec);cursor:default}
+  .dark{background:linear-gradient(#777,#4b4b4b);color:#fff;border:1px solid #333;border-radius:4px;padding:5px 14px;font-weight:bold}
+  .tips{margin-top:28px;max-width:560px;border:1px dashed #b9c4d4;background:#f6f9fd;border-radius:6px;padding:12px 14px}
+  .tips h3{margin:0 0 6px;font-size:13px}
+  .tips ol{margin:0;padding-left:18px}
+  .tips li{margin:4px 0}
+  .tips code{background:#e8edf5;padding:1px 4px;border-radius:3px}
+  .err-inline{color:var(--err);font-size:12px;margin-top:4px}
+  .pinwrap{position:relative;display:inline-block}
+  /* spinner overlay */
+  .overlay{position:fixed;inset:0;background:rgba(255,255,255,.55);display:none;align-items:center;justify-content:center;z-index:50}
+  .overlay.on{display:flex}
+  .spinner{width:46px;height:46px;border:5px solid #c9d3e2;border-top-color:var(--navy);border-radius:50%;transform:rotate(35deg)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* tabs (copied from the real page) */
+  .tabs{display:flex;background:#f9fafb;border-bottom:1px solid #eeeeef;height:31px;margin:12px 12px 0;padding:0}
+  .tab{border:none;background:transparent;padding:0 18px;height:30px;font:12px Arial,sans-serif;color:#5b5e65;border-radius:4px 4px 0 0}
+  .tab.on{background:#026bc8;color:#fff}
+  .regframe{background:#afbcc9;padding:6px;flex:1;display:flex;flex-direction:column;min-height:0;margin:0 12px 12px}
+  .regpanel{background:#fff;border-radius:7.2px;padding:12px;flex:1;overflow:auto;font:12px Arial,sans-serif;color:#333}
+  .desc{font:bold 16.8px Arial,sans-serif;color:#333;margin:0 0 8px}
+  .termlbl{font:bold 12px Arial,sans-serif}
+  .crnrow{display:flex;align-items:center;gap:0;margin:0 0 0 10px}
+  #crnRows{margin-top:20px}
+  .crnrow .lbl{font-size:11px;padding-right:4px}
+  .crnrow input{width:114.5px;height:20px;padding:0 5.5px;margin:0 0 10px;border:1px inset #a2a2a2;border-radius:4px;font:11px Arial,sans-serif;color:#333;background:#fff;outline:none}
+  .crnrow input:focus{box-shadow:0 0 0 1px #026bc8}
+  .crnrow input.bad{border:1px solid #cc0000}
+  .crnrow .msg{font-size:11px;margin:0 0 10px 10px}
+  .crnrow .msg.bad{color:#d42828}
+  .crnrow .msg.ok{color:#5b5e65}
+  .addrow{display:flex;align-items:center;gap:8px;padding:0 0 15px 40px}
+  .addrow a{color:#333;font-size:12px;text-decoration:underline}
+  .dark{background:linear-gradient(#999,#555);color:#fff;border:1px solid #333;border-radius:7.2px;padding:6px 24px;height:28px;font:bold 12px Arial,sans-serif;box-shadow:inset 0 0 3px #fff}
+  .dark:hover{background:linear-gradient(#a5a5a5,#5f5f5f)}
+  .search td{padding:4px 6px}
+  .search td.l{text-align:right;width:120px}
+  .results{width:100%;border-collapse:collapse;margin-top:14px;font-size:12px}
+  .results th,.results td{border-bottom:1px solid #eeeeef;padding:5px 6px;text-align:left}
+  .results th{background:#f9fafb;font-weight:normal}
+  /* bottom panel */
+  .divider{height:12px;background:#dfe3e8;display:flex;justify-content:center;gap:2px;flex:none}
+  .divider button{border:none;background:#c4cbd5;width:24px;height:12px;font-size:9px;line-height:12px;padding:0}
+  .bottom{display:flex;flex:none;height:0;overflow:hidden;transition:height .25s}
+  .bottom.open{height:300px}
+  .sched{flex:1;min-width:0;display:flex;flex-direction:column;border-right:6px solid #e3e6ea}
+  .sum{flex:1;min-width:0;display:flex;flex-direction:column}
+  .ptabs{display:flex;background:#f9fafb;border-bottom:1px solid #eeeeef;height:30px;flex:none}
+  .ptabs div{padding:0 18px;line-height:30px;font:12px/30px Arial,sans-serif;color:#5b5e65}
+  .ptabs .on{background:#026bc8;color:#fff}
+  .stitle{font:bold 12px/24px Arial;color:#333;background:#edf0f4;border-bottom:1px solid #999;padding-left:10px;height:24px;flex:none}
+  .grid{flex:1;overflow:auto;font:12px Arial,sans-serif}
+  .grid table{border-collapse:collapse;width:100%;table-layout:fixed;border:1px solid #ddd}
+  .grid th{background:#fff;font-weight:bold;padding:1px;border:1px solid #ddd;position:sticky;top:0;z-index:2;font-size:12px}
+  .grid td{border-left:1px solid #ddd;border-bottom:1px dotted #e6e6e6;height:42px;padding:0;vertical-align:top;position:relative}
+  .grid td.hr{text-align:right;padding:0 4px;color:#333;width:50px;border-bottom:1px solid #ddd}
+  .blk{position:absolute;left:1px;right:1px;border-radius:3px;padding:4px 2px;font:8.5px/1.2 Arial,sans-serif;overflow:hidden;color:#000;z-index:1;text-decoration:underline}
+  .blk.reg{background:var(--bc,#a5d48d)}
+  .blk.pen{background:var(--bc,#a5d48d);opacity:.55;font-style:oblique}
+  .blk.err{background:#ebcfcf;font-style:oblique}
+  .blk.wl{background:#ffe0a6;font-style:oblique}
+  .sumtitle{font:bold 12px/23px Arial;color:#333;background:linear-gradient(#f1f1f1,#dedede);padding:0 0 0 8px;height:29px;line-height:29px;flex:none}
+  .sumtab{flex:1;overflow:auto}
+  .sumtab.haserr{border:1px solid #cc0000}
+  .sumtab table{width:100%;border-collapse:collapse;font:12px Arial,sans-serif}
+  .sumtab th{text-align:left;padding:3px 0 3px 10px;height:38px;border-bottom:1px solid #eeeeef;border-left:1px solid #eeeeef;font-weight:normal;color:#333;position:sticky;top:0;background:#fff}
+  .sumtab td{padding:3px 5px;height:35px;border-bottom:1px solid #eeeeef;border-left:1px solid #eeeeef;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;color:#333}
+  .sumtab td.ttl{text-decoration:underline}
+  .sumtab tr.errrow td{background:#ebcfcf;font-style:oblique;color:#000}
+  .sumtab tr.errrow td:first-child{background:#f2f8fc}
+  .sumtab tr.penrow td{font-style:oblique}
+  .st{display:inline-block;padding:4px;border-radius:7.2px;font:italic 12px Arial}
+  .st.reg{background:#d4ffaa;color:#333}
+  .st.wl{background:#ffe0a6;color:#333}
+  .st.pen{color:#333}
+  .st.err{color:#000;text-decoration:underline;font-style:normal}
+  .act{width:150px;height:28px;border:1px solid #b2b3b7;border-radius:4px;font:12px Arial;color:#151618;background:#fff;padding:0 4px 0 8px}
+  .errrow .act{border:2px solid #026bc8;font-style:oblique}
+  .sumfoot{font:10px Arial;padding:10px;color:#333;background:#edf0f4;border:1px solid #d3d3d3;flex:none}
+  .sumfoot b{font-weight:bold}
+  .footer{height:38px;background:#f3f4f6;border-top:1px solid #ccc;display:flex;align-items:center;padding:0 8px;gap:12px;font-size:12px;flex:none}
+  .footer .sp{flex:1}
+  .submit{background:linear-gradient(#999,#555);color:#fff;border:1px solid #333;border-radius:7.2px;padding:6px 24px;height:28px;font:bold 12px Arial;box-shadow:inset 0 0 3px #fff}
+  .submit:disabled{background:linear-gradient(#ddd,#c8c8c8);border-color:#bbb;color:#f4f4f4;cursor:default;box-shadow:none}
+  /* notification center (copied from the real page) */
+  .bell{align-self:stretch;width:40px;background:#efc728;color:#151618;font:500 20px 'Open Sans',Arial;display:none;align-items:center;justify-content:center;cursor:pointer;margin-right:-12px}
+  .bell.on{display:flex}
+  .notes{position:fixed;top:58px;right:0;width:480px;z-index:40;background:#0071a7;display:none}
+  .notes.on{display:block}
+  .note{background:#ffeeed;color:#d42828;border-left:1px solid #d42828;border-bottom:1px solid #d42828;margin:0 0 0 12px;padding:9.6px 4.8px 9.6px 34px;font:19.2px/1.5 'Open Sans',Arial;text-decoration:underline;position:relative}
+  .note:before{content:"!";position:absolute;left:9px;top:13px;width:17px;height:17px;border-radius:50%;background:#d42828;color:#fff;font:bold 12px/17px Arial;text-align:center;text-decoration:none}
+  .note.ok{background:#eef8e8;color:#2c7a1a;border-color:#2c7a1a}
+  .note.ok:before{content:"✓";background:#2c7a1a}
+  .done{position:fixed;inset:0;background:rgba(15,30,55,.45);display:none;align-items:center;justify-content:center;z-index:60}
+  .done.on{display:flex}
+  .done .box{background:#fff;border-radius:8px;padding:22px 26px;max-width:380px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+  .done .big{font:700 40px/1.1 ui-monospace,Menlo,Consolas,monospace;margin:8px 0}
+  .done p{margin:6px 0;color:#444}
+  .hidden{display:none!important}
+  .settings{position:fixed;top:52px;right:8px;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:12px 14px;z-index:45;width:290px;font-size:12px}
+  .settings label{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+  .gen{margin-top:10px;font-size:12px}
+  .gen code{font-size:13px;background:#e8edf5;padding:2px 5px;border-radius:3px;margin-right:4px}
+  .small{font-size:11px;color:#666}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="brand">Registration Practice</span><span class="pill">PRACTICE ONLY – not the real portal</span>
+  <span class="sp"></span>
+  <span class="east">
+  <span class="small" style="color:#cbd6ea" id="bestLbl"></span>
+  <span class="watch" id="watch">0.0s</span>
+  <button class="tbtn" id="setBtn" title="Settings">⚙ Settings</button>
+  <button class="tbtn" id="resetBtn">↺ Restart</button>
+  <span style="font-size:16px;padding-left:6px">Practice, Student</span>
+  <span class="bell" id="bell"></span>
+  </span>
+</div>
+
+<div class="settings hidden" id="settings">
+  <b>Practice settings</b>
+  <label><input type="checkbox" id="optReal" checked> Sections that were <b>full on Nov 5</b> are full (with waitlists where they had them)</label>
+  <label><input type="checkbox" id="optFull"> Also make extra sections randomly <b>full</b></label>
+  <label><input type="checkbox" id="optRush" checked> Rush-hour spinner after Continue (~4s, like when everyone logs in at 11:00)</label>
+  <div class="small">Time to beat: 20s (Teague's real run).</div>
+</div>
+
+<div class="crumbs" id="crumbs"></div>
+<div class="h1" id="h1"></div>
+
+<div class="main">
+  <!-- SCREEN 1: term + PIN -->
+  <div class="frame" id="s1">
+    <div class="card">
+      <form id="termForm" autocomplete="off">
+        <label class="f">Terms Open for Registration</label>
+        <select class="sel" id="termSel" style="width:300px"><option value="" selected disabled>Select a term…</option><option value="202620">Spring 2027</option></select>
+        <div id="pinBox" class="hidden">
+          <div style="height:16px"></div>
+          <label class="f" for="pin">Practice PIN*</label>
+          <input class="inp" id="pin" type="password" inputmode="numeric" maxlength="6" style="width:145px" placeholder="anything">
+          <div class="err-inline hidden" id="pinErr">Enter a PIN (anything works).</div>
+        </div>
+        <div class="err-inline hidden" id="termErr">Pick a term first.</div>
+        <div style="height:18px"></div>
+        <button class="btn" id="contBtn" type="submit">Continue</button>
+      </form>
+
+      <div class="tips">
+        <p class="small" style="margin:0">Any PIN works — don't use your real one. Nothing here is saved or sent anywhere. Stopwatch starts at Continue and stops when everything says Registered.</p>      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: register -->
+  <div class="hidden" id="s2" style="flex:1;display:flex;flex-direction:column;min-height:0">
+      <div class="tabs">
+        <button class="tab on" data-tab="find">Find Classes</button>
+        <button class="tab" data-tab="crn">Enter CRNs</button>
+        <button class="tab" data-tab="opts">Schedule and Options</button>
+      </div>
+      <div class="regframe"><div class="regpanel">
+        <div id="tab-find">
+          <div class="desc">Enter Your Search Criteria</div>
+          <div class="termlbl">Term: Spring 2027</div>
+          <form id="searchForm" style="margin-top:10px">
+          <table class="search">
+            <tr><td class="l">Subject</td><td><input class="inp" id="qSub" style="width:330px;height:28px" placeholder="e.g. CPS, MAT, BIO"></td></tr>
+            <tr><td class="l">Course Number</td><td><input class="inp" id="qNum" style="width:100px"></td></tr>
+            <tr><td class="l">Keyword</td><td><input class="inp" id="qKey" style="width:330px"></td></tr>
+            <tr><td></td><td><button class="btn" type="submit">Search</button> <a href="#" id="qClear" style="color:#333;margin-left:6px;text-decoration:underline">Clear</a></td></tr>
+          </table>
+          </form>
+          <div id="results"></div>
+        </div>
+        <div id="tab-crn" class="hidden">
+          <div class="desc">Enter Course Reference Numbers (CRNs) to Register</div>
+          <div class="termlbl">Term: Spring 2027</div>
+          <div id="crnRows"></div>
+          <div class="addrow"><a href="#" id="addCrn">+ Add Another CRN</a><button class="dark" id="addSum">Add to Summary</button></div>
+        </div>
+        <div id="tab-opts" class="hidden"><p class="small">Nothing to do here on registration day — stick to Enter CRNs.</p></div>
+      </div></div>
+  </div>
+
+  <div class="divider hidden" id="divider"><button id="pUp" title="Show panels">▲</button><button id="pDown" title="Hide panels">▼</button></div>
+  <div class="bottom" id="bottom">
+    <div class="sched">
+      <div class="ptabs"><div class="on">Schedule</div><div>Schedule Details</div></div>
+      <div class="stitle">Class Schedule for Spring 2027</div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <div class="sum">
+      <div class="sumtitle">▤ Summary</div>
+      <div class="sumtab" id="sumTab"><table><thead><tr><th>CRN</th><th>Course, Section</th><th>Title</th><th>Hours</th><th>Schedule Type</th><th>Status</th><th>Action</th></tr></thead><tbody id="sumBody"></tbody></table></div>
+      <div class="sumfoot" id="sumFoot"></div>
+    </div>
+  </div>
+  <div class="footer hidden" id="footer">
+    <span class="small">Panels ▾</span><span class="sp"></span>
+    <label><input type="checkbox"> Conditional Add and Drop</label>
+    <button class="submit" id="submitBtn" disabled>Submit</button>
+  </div>
+</div>
+
+<div class="notes" id="notes"></div>
+<div class="overlay" id="overlay"><div class="spinner"></div></div>
+<div class="done" id="done"><div class="box">
+  <div style="font-weight:bold;font-size:16px">You're registered! 🎉</div>
+  <div class="big" id="doneTime"></div>
+  <p id="doneCmp"></p>
+  <p class="small" id="doneBest"></p>
+  <div style="margin-top:12px;display:flex;gap:8px;justify-content:center">
+    <button class="btn" id="doneClose">Look at schedule</button>
+    <button class="dark" id="doneAgain">Run it again</button>
+  </div>
+</div></div>
+
+<script>
+const RAW = [["20575","AFS131","","History of Colonial Latin Amer",[["C","MW",660,740]],0],["20068","AFS142","","Hist of East & Southern Africa",[["C","MWF",930,980]],0],["20620","AFS152","","Poetry and Poetics of Rap",[["C","MW",510,590]],0],["20279","AFS239","","HipHop: Globl Poltcs of Cultur",[["C","TR",510,590]],0],["20569","AFS257","","African-American Literature",[["C","TR",510,590]],0],["20644","AFS272","","Theatre for Social Change",[["C","TR",765,845]],0],["20661","AFS274","","Nerd Problems: Race and Fandom",[["C","TR",855,935]],0],["20289","AFS279","","The Urban Citizen (CBL)",[["C","TR",765,845]],0],["20607","AFS360","","Race and Ethnic Relations",[["C","MW",780,860]],0],["20548","AFS366","","Race, Ethnicity, and Health",[["C","TR",600,680]],0],["20200","AFS378","","Medicine in Literature",[["C","MW",660,740]],0],["20277","AMS100","","Intro to American Studies",[["C","MW",660,740]],0],["20278","AMS239","","HipHop: Globl Poltcs of Cultur",[["C","TR",510,590]],0],["20418","AMS251","","Modern & Contemp Amer Drama",[["C","MW",660,740]],0],["20659","AMS274","","Nerd Problems: Race and Fandom",[["C","TR",855,935]],0],["20366","AMS277","","Romance & Politics of Pleasure",[["C","MW",900,980]],0],["20288","AMS279","","The Urban Citizen (CBL)",[["C","TR",765,845]],0],["20283","AMS358","","Rights and Representations",[["C","WF",510,590]],0],["20368","AMS373","","American Communities",[["C","TR",600,680]],0],["20370","AMS474","","Selling Sex",[["C","WF",780,860]],0],["20120","ANT100","A","Social Anthropology",[["C","MW",780,860]],0],["20121","ANT100","B","Social Anthropology",[["C","TR",765,845]],0],["20122","ANT100","C","Social Anthropology",[["C","TR",855,935]],0],["20123","ANT100","D","Social Anthropology",[["C","TR",1005,1085]],0],["20124","ANT102","A","Intro to Archaeology",[["C","MW",510,590]],0],["20126","ANT102","B","Intro to Archaeology",[["C","TR",600,680]],0],["20132","ANT244","","Indigenous Environmntl Justice",[["C","TR",765,845]],0],["20682","ANT255","","Peril&Possibilty:Urban S. Asia",[["C","TR",600,680]],0],["20127","ANT260","","Archaeology of North America",[["C","MW",660,740]],0],["20633","ANT269","","Circumpolar Peoples",[["C","TR",510,590]],0],["20131","ANT360","","Spatial Archaeology",[["C","T",810,980]],0],["20134","ANT372","","Of Love & Desire: Anthro Persp",[["C","W",810,980]],0],["20429","ART114","","Introductory Drawing",[["C","MW",540,710]],0],["20428","ART116","","Introductory Sculpture",[["C","MW",810,980]],0],["20431","ART142","","Introduction to Photography",[["C","TR",810,980]],0],["20430","ART214","","Drawing: Figure & Narrative",[["C","MW",1170,1340]],0],["20433","ART220","","Sustainable Design",[["C","TR",810,980]],0],["20416","ART225","","Costume Design",[["C","TR",600,680]],0],["20434","ART236","","Intro to Printmaking",[["C","TR",510,680]],0],["20420","ART270","","Digitl Renderng for Entertnmnt",[["C","TR",600,680]],0],["20435","ART277","","Hybrd Photogrphy:Analog&Digitl",[["C","TR",1170,1340]],0],["20432","ART322","","Advanced Painting",[["C","MW",810,980]],0],["20436","ART379","","Advanced Sculpture",[["C","MW",540,710]],0],["20444","FLM110","","Intro to Film & Media Studies",[["C","TR",510,590],["L","T",1170,1340]],0],["20580","FLM115","","Film History",[["C","MW",510,590],["L","M",1170,1340]],0],["20445","FLM126","B","Introduction to Filmmaking",[["C","MW",855,980]],0],["20601","FLM126","A","Introduction to Filmmaking",[["C","MW",600,740]],0],["20446","FLM222","","Narrative Filmmaking",[["C","TR",600,680],["L","W",1170,1340]],0],["20546","FLM279","","Religion and Film",[["C","T",1170,1340]],0],["20448","FLM324","","16mm Filmmaking",[["C","MW",600,740]],0],["20449","FLM341","","Ecological Cinema",[["C","M",810,980]],0],["20427","FLM387","","Writing for Television",[["C","W",810,980]],0],["20437","HAA103","","Introduction to Art History",[["C","TR",510,590]],0],["20438","HAA105","","Introduction to Asian Art",[["C","MW",870,950]],0],["20439","HAA123","","Intro to Architecture",[["C","MW",660,740]],0],["20440","HAA241","","18th- and 19th-Century Art",[["C","TR",765,845]],0],["20566","HAA271","","Architecture and Health",[["C","MW",780,860]],0],["20442","HAA281","","Classical Chinese Painting",[["C","TR",855,935]],0],["20443","HAA353","","American Photography",[["C","TR",1170,1250]],0],["20543","HAA371","","Ancient Greek Sculpture",[["C","W",810,980]],0],["20681","HAA374","","Urban Life in the Middle East",[["C","TR",600,680]],0],["20001","BIO101","A","Ecology & Evolutionary Biology",[["L","W",750,980],["C","TR",600,680]],0],["20002","BIO101","B","Ecology & Evolutionary Biology",[["C","MWF",540,590],["L","R",765,995]],0],["20003","BIO101","C","Ecology & Evolutionary Biology",[["C","MWF",600,650],["L","F",750,980]],0],["20004","BIO101","D","Ecology & Evolutionary Biology",[["C","MWF",600,650],["L","T",765,995]],0],["20005","BIO102","A","Cell & Molecular Biology",[["C","TR",510,590],["L","T",810,980]],0],["20006","BIO102","B","Cell & Molecular Biology",[["C","TR",600,680],["L","R",810,980]],0],["20007","BIO102","C","Cell & Molecular Biology",[["C","MWF",540,590],["L","W",810,980]],0],["20663","BIO102","D","Cell & Molecular Biology",[["L","M",810,980],["C","MWF",480,530]],0],["20009","BIO200","A","Integrative Biology",[["C","TR",510,590],["L","T",810,980]],0],["20010","BIO200","B","Integrative Biology",[["C","TR",600,680],["L","W",810,980]],0],["20011","BIO200","C","Integrative Biology",[["C","WF",660,740],["L","M",810,980]],0],["20012","BIO210","A","Biostatistics",[["C","TR",510,590]],0],["20013","BIO210","B","Biostatistics",[["C","TR",1170,1250]],0],["20014","BIO240","","Neuroscience",[["C","MWF",600,650]],0],["20015","BIO240","A","Neuroscience Lab",[["L","M",750,980]],1],["20016","BIO240","B","Neuroscience Lab",[["L","W",750,980]],1],["20017","BIO313","","Genes and Genomes",[["C","MWF",660,710],["L","F",810,980]],0],["20019","BIO343","","Human Neuroanatomy",[["C","R",765,995]],0],["20143","BIO360","","Wildlife Conservation",[["C","MW",660,740]],0],["20047","CHM111","","General Chemistry 1",[["C","MWF",660,710],["L","W",750,980]],0],["20049","CHM112","A","General Chemistry 2",[["L","T",765,995],["C","MW",600,680]],0],["20050","CHM112","B","General Chemistry 2",[["C","TR",600,680],["L","R",765,995]],0],["20051","CHM112","C","General Chemistry 2",[["L","F",750,980],["C","MWF",660,710]],0],["20052","CHM112","D","General Chemistry 2",[["C","TR",510,590],["L","W",750,980]],0],["20053","CHM212","A","Organic Chemistry 2 Van",[["C","MWF",480,530],["L","W",750,980]],0],["20054","CHM212","B","Organic Chemistry 2",[["C","MWF",600,650],["L","T",765,995]],0],["20055","CHM212","C","Organic Chemistry 2",[["C","MWF",540,590],["L","R",765,995]],0],["20373","CPS111","","Computer Science I",[["L","F",810,980],["C","TR",765,845]],0],["20374","CPS112","","Computer Science",[["L","M",810,980],["C","MW",510,590]],0],["20375","CPS222","","Computer Science",[["C","MW",660,740]],0],["20226","ECO310","","Econometrics",[["C","R",810,980]],0],["20142","ENE360","","Wildlife Conservation",[["C","MW",660,740]],0],["20094","MAT109","A","Calculus I",[["C","MWF",525,590]],0],["20095","MAT109","B","Calculus I",[["C","MWF",660,725]],0],["20096","MAT109","C","Calculus I",[["C","F",810,860],["C","TR",1005,1085]],0],["20097","MAT109","D","Calculus I",[["C","TR",855,935],["C","M",810,860]],0],["20664","MAT109","E","Calculus I",[["C","MWF",735,800]],0],["20098","MAT110","A","Calculus",[["C","MWF",525,590]],0],["20099","MAT110","B","Calculus",[["C","F",600,650],["C","TR",510,590]],0],["20100","MAT110","C","Calculus",[["C","F",750,800],["C","TR",600,680]],0],["20110","MAT216","","Probability and Statistics I",[["C","TR",600,680]],0],["20147","PHY101","","General Physics 1",[["C","MWF",600,650]],0],["20148","PHY101","A","General Physics 1 Lab",[["L","M",810,980]],1],["20150","PHY101","B","General Physics 1 Lab",[["L","T",810,980]],1],["20152","PHY101","C","General Physics 1 Lab",[["L","W",810,980]],1],["20589","PHY101","","D",[["C","R",810,980]],0],["20159","PHY102","","General Physics 2",[["C","MWF",660,710]],0],["20160","PHY102","A","General Physics 2 Lab",[["L","M",810,980]],1],["20161","PHY102","B","General Physics 2 Lab",[["L","W",810,980]],1],["20162","PHY102","C","General Physics 2 Lab",[["L","R",810,980]],1],["20153","PHY111","A","Introduction to Mechanics",[["C","MWF",540,590]],0],["20155","PHY111","A1","Introduction to Mechanics Lab",[["L","M",810,980]],1],["20156","PHY111","B2","Introduction to Mechanics Lab",[["L","T",810,980]],1],["20157","PHY111","C3","Introduction to Mechanics Lab",[["L","W",810,980]],1],["20588","PHY111","B","Introduction to Mechanics",[["C","MWF",660,710]],0],["20590","PHY111","D4","LAB",[["C","R",810,980]],0],["20164","PHY112","","Intro Electricity &",[["C","MWF",600,650]],0],["20165","PHY112","A","Intro Electricity & Lab",[["L","M",810,980]],1],["20166","PHY112","B","Intro Electricity & Lab",[["L","W",810,980]],1],["20168","PHY112","C","Intro Electricity & Lab",[["L","R",810,980]],1],["20246","PSY202","A","Developmental Psychology",[["C","WF",870,950]],0],["20247","PSY202","B","Developmental Psychology",[["C","TR",600,680]],0],["20249","PSY208","","Psychopathology",[["C","M",1170,1340]],0],["20577","PSY237","","Hormones and Behavior",[["C","WF",870,950]],0],["20251","PSY300","","Research Design and Statistics",[["C","TR",600,680]],0],["20252","PSY300","A","Research Design and Statistics Perm Lab",[["L","T",810,980]],1],["20253","PSY300","B","Research Design and Statistics Perm Lab",[["L","W",810,980]],1],["20254","PSY320","","Animal Behavior w/Lab",[["C","TR",510,590],["L","R",810,980]],0],["20565","PSY354","","Psychopharmacology w/Lab",[["C","TR",600,680],["L","T",810,980]],0],["20258","PSY480","","Collab Res:Animal Behv &Models",[["C","M",810,980]],0],["20259","PSY482","","Collab Res Hum Behav Soc Evol",[["C","W",810,980]],0],["20579","WGS237","","Hormones and Behavior",[["C","WF",870,950]],0],["20554","BIO319","","Human Anatomy & Physiology II",[["C","MWF",540,590],["L","M",750,980]],0],["20587","BIO335","","Principles of Biochemistry",[["C","TR",1170,1250]],0],["20018","BIO346","","Cancer Biology",[["C","MWF",600,650],["L","T",765,995]],0],["20232","BIO354","","Epidemiology",[["C","MW",510,590],["L","W",750,980]],0],["20615","BIO378","","Stream Ecology",[["C","MW",660,740],["L","F",750,980]],0],["20020","BOS200","A","Strategies for Organizing",[["C","TR",600,680]],0],["20021","BOS200","B","Strategies for Organizing",[["C","TR",855,935]],0],["20022","BOS200","C","Strategies for Organizing",[["C","MW",510,590]],0],["20023","BOS200","D","Strategies for Organizing",[["C","MW",660,740]],0],["20024","BOS224","A","Accounting for Decision Making",[["C","MW",510,590]],0],["20025","BOS224","B","Accounting for Decision Making",[["C","MW",660,740]],0],["20026","BOS224","C","Accounting for Decision Making",[["C","MW",510,590]],0],["20027","BOS250","A","Quantitative Methods",[["C","TR",765,845]],0],["20028","BOS250","B","Quantitative Methods",[["C","TR",855,935]],0],["20542","BOS276","","Business Chinese",[["C","MWF",660,725]],0],["20029","BOS315","A","Organizational Behavior",[["C","TR",600,680]],0],["20030","BOS315","B","Organizational Behavior",[["C","TR",765,845]],0],["20031","BOS324","A","Analysis & Control Systems",[["C","MWF",480,530]],0],["20032","BOS324","B","Analysis & Control Systems",[["C","MWF",600,650]],0],["20624","BOS325","","Financial Reporting & Analysis",[["C","TR",855,935]],0],["20033","BOS332","A","Law, Ethics & Society",[["C","MWF",750,800]],0],["20034","BOS332","B","Law, Ethics & Society",[["C","MWF",930,980]],0],["20035","BOS341","A","Marketing",[["C","TR",510,590]],0],["20036","BOS341","B","Marketing",[["C","TR",600,680]],0],["20037","BOS350","","International Business",[["C","MW",870,950]],0],["20039","BOS360","A","Finance",[["C","MWF",600,650]],0],["20040","BOS360","B","Finance",[["C","MWF",660,710]],0],["20041","BOS363","","Portfolio Management",[["C","MW",780,860]],0],["20119","BOS365","","Entrepreneurial Discovery",[["C","WF",780,860]],0],["20667","BOS372","","20th Century US Business",[["C","MW",660,740]],0],["20042","BOS480","A","Social Media Marketing",[["C","TR",765,845]],0],["20043","BOS480","B","Sports Management",[["C","W",810,980]],0],["20044","BOS480","C","EnvironPerformance&Disclosures",[["C","MW",780,860]],0],["20046","BOS480","D","Organizational Ethics",[["C","MW",870,950]],0],["20048","BOS480","E","Branding in the Digital Age",[["C","TR",855,935]],0],["20056","CHM221","","Chemical Analysis",[["C","TR",510,590],["L","W",750,980]],0],["20058","CHM372","","Prebiotic Chemistry",[["C","MWF",600,650]],0],["20605","CHM373","","Organometallics",[["C","WF",510,590]],0],["20648","CHM472","","Capstone: Prebiotic Chemistry",[["C","MWF",600,650]],0],["20646","CHM473","","Capstone: Organometallics",[["C","WF",510,590]],0],["20193","CHN102","","Elementary Chinese",[["C","MWF",525,590]],0],["20194","CHN241","","Chinese Popular Culture",[["C","TR",765,845]],0],["20541","CHN276","","Business Chinese",[["C","MWF",660,725]],0],["20151","CLS230","","Classical Myth",[["C","MW",660,740]],0],["20163","CLS371","","Ancient Greek Sculpture",[["C","W",810,980]],0],["20665","GRK102","","Elem Ancient Greek",[["C","MWF",600,650]],0],["20146","LAT102","","Elementary Latin",[["C","MWF",540,590]],0],["20149","LAT202","","Intro to Latin Poetry",[["C","TR",600,680]],0],["20685","LAT373","","Latin Love Poetry",[["C","TR",600,680]],0],["20376","CPS237","","Computational Discrete Math",[["C","TR",600,680]],0],["20377","CPS242","","Computer Organization",[["C","MW",780,860]],0],["20378","CPS261","","Algorithms",[["C","TR",855,935]],0],["20379","CPS337","A","Theory of Computer Science",[["C","TR",600,680]],0],["20380","CPS337","B","Theory of Computer Science",[["C","TR",855,935]],0],["20383","CPS373","","Ubicomp 101",[["C","MW",870,950]],0],["20611","CPS377","","Databases& Data Representation",[["C","TR",765,845]],0],["20105","DSC115","A","Introduction to Data Science",[["C","TR",510,590]],0],["20106","DSC115","B","Introduction to Data Science",[["C","TR",855,935]],0],["20109","DSC215","","Intro to Statistical Modeling",[["C","TR",765,845]],0],["20677","HIS311","","History of Medicine",[["C","MW",780,860]],0],["20101","MAT111","A","Calculus",[["C","MWF",525,590]],0],["20102","MAT111","B","Calculus",[["C","MWF",660,725]],0],["20103","MAT115","A","Introduction to Data Science",[["C","TR",510,590]],0],["20104","MAT115","B","Introduction to Data Science",[["C","TR",855,935]],0],["20108","MAT215","","Intro to Statistical Modeling",[["C","TR",765,845]],0],["20561","MAT230","A","Linear Algebra &Modrn",[["C","MWF",525,590]],0],["20562","MAT230","B","Linear Algebra &Modrn Applicat",[["C","MWF",660,725]],0],["20113","MAT316","","Probability and Statistics",[["C","MWF",660,725]],0],["20116","MAT375","","Time Series Analysis",[["C","TR",600,680]],0],["20678","NSP311","","History of Medicine",[["C","MW",780,860]],0],["20343","PHI130","A","Good Reasons",[["C","MWF",600,650]],0],["20658","PHI130","B","Good Reasons",[["C","MWF",660,710]],0],["20598","RST353","","Artificial Intelligence & You",[["C","T",810,980]],0],["20606","SOC360","","Race and Ethnic Relations",[["C","MW",780,860]],0],["20676","STS311","","History of Medicine",[["C","MW",780,860]],0],["20599","STS353","","Artificial Intelligence & You",[["C","T",810,980]],0],["20208","ECO100","A","Intro to Economic Principles",[["C","TR",600,680]],0],["20209","ECO100","B","Intro to Economic Principles",[["C","TR",510,590]],0],["20210","ECO100","C","Intro to Economic Principles",[["C","TR",600,680]],0],["20211","ECO100","D","Intro to Economic Principles",[["C","TR",1005,1085]],0],["20212","ECO100","E","Intro to Economic Principles",[["C","MWF",660,710]],0],["20213","ECO103","A","Intro to Economic Perspectives",[["C","TR",855,935]],0],["20214","ECO103","B","Intro to Economic Perspectives",[["C","TR",1005,1085]],0],["20215","ECO103","C","Intro to Economic Perspectives",[["C","MWF",540,590]],0],["20216","ECO103","D","Intro to Economic Perspectives",[["C","MWF",600,650]],0],["20596","ECO174","","Marxian Economics",[["C","TR",600,680]],0],["20217","ECO200","A","Microeconomics",[["C","MWF",750,800]],0],["20218","ECO200","B","Microeconomics",[["C","TR",765,845]],0],["20219","ECO201","A","Macroeconomics",[["C","MW",660,740]],0],["20220","ECO201","B","Macroeconomics",[["C","MW",780,860]],0],["20221","ECO203","A","Value and Distribution",[["C","W",810,980]],0],["20222","ECO203","B","Value and Distribution",[["C","TR",855,935]],0],["20223","ECO237","","Polit Econ of Urban Developmnt",[["C","T",810,980]],0],["20224","ECO240","","Env & Natural Resource Econ",[["C","TR",765,845]],0],["20227","ECO357","","Experimental Economics",[["C","TR",855,935]],0],["20595","ECO374","","Labor Economics",[["C","MW",870,950]],0],["20125","ENE112","A","Earth & Environmental Science",[["C","MW",510,590],["L","M",810,980]],0],["20128","ENE112","B","Earth & Environmental Science",[["C","TR",510,590],["L","T",810,980]],0],["20652","ENE112","C","Earth & Environmental Science",[["C","MWF",600,650],["L","W",810,980]],0],["20090","ENE117","A","Environment and Human Values",[["C","MW",660,740]],0],["20092","ENE117","B","Environment and Human Values",[["C","TR",600,680]],0],["20130","ENE244","","Indigenous Environmntl Justice",[["C","TR",765,845]],0],["20135","ENE247","","Environmental Studies Methods",[["C","TR",855,935]],0],["20136","ENE250","","Env Resources & GIS de",[["C","TR",510,590],["L","T",810,980]],0],["20059","ENE254","","Groundwater Resources",[["C","T",1170,1340]],0],["20653","ENE278","","Mineral Res, Econ, and Environ",[["C","TR",600,680],["L","R",810,980]],0],["20080","ENE312","","N. American Environ History",[["C","TR",765,845]],0],["20140","ENE320","","Internationl Environmental Law",[["C","TR",600,680]],0],["20651","ENE374","","Urban Life in the Middle East",[["C","TR",600,680]],0],["20604","ENE376","","Environmental Data Science",[["C","MW",660,740],["L","R",1170,1340]],0],["20654","ENE454","","Environmental Problems",[["C","M",810,980]],0],["20145","ENE480","","EES Seminar",[["C","M",810,980]],0],["20619","ENG152","","Poetry and Poetics of Rap",[["C","MW",510,590]],0],["20297","ENG165","","Violence, Truth, and Story",[["C","MW",780,860]],0],["20300","ENG204","","Nineteenth-Century British Lit",[["C","TR",600,680]],0],["20388","ENG205","","Songwriting",[["C","TR",600,680]],0],["20302","ENG207","","American Literature 2",[["C","WF",510,590]],0],["20304","ENG225","A","Intro to Creative Writing",[["C","TR",1005,1085]],0],["20305","ENG225","B","Intro to Creative Writing",[["C","TR",1005,1085]],0],["20306","ENG225","C","Intro to Creative Writing",[["C","MW",870,950]],0],["20307","ENG225","D","Intro to Creative Writing",[["C","TR",510,590]],0],["20308","ENG226","","Engaging Texts Intro",[["C","TR",855,935]],0],["20309","ENG253","","Epic and Romance",[["C","TR",600,680]],0],["20311","ENG257","","African-American Literature",[["C","TR",510,590]],0],["20312","ENG265","","Contemporary Graphic Novel",[["C","MWF",660,710]],0],["20594","ENG267","","Law, Literature & the Person",[["C","WF",660,740]],0],["20637","ENG274","","What is Queer Literature?",[["C","MW",900,980]],0],["20313","ENG316","","Harlem Renaissance",[["C","TR",765,845]],0],["20317","ENG371","","Indig/Colonial Entanglements",[["C","TR",855,935]],0],["20424","ENG383","","Playwriting",[["C","M",810,980]],0],["20319","ENG384","","Writing Creative Nonfiction",[["C","WF",780,860]],0],["20551","ENG482","","Advanced Poetry Workshop",[["C","T",810,980]],0],["20322","ENG494","","Contemporary Indian Literature",[["C","W",810,980]],0],["20167","FRN102","A","Elementary French",[["C","MWF",480,530]],0],["20169","FRN102","B","Elementary French",[["C","MWF",600,650]],0],["20668","FRN102","C","Elementary French",[["C","MWF",750,800]],0],["20170","FRN202","","Intermediate French",[["C","MWF",540,590]],0],["20571","FRN224","","The Age of Enlightenment",[["C","MW",900,980]],0],["20172","FRN302","","Engaging w/Francophone Wrld",[["C","TR",600,680]],0],["20199","FRN378","","Medicine in Literature",[["C","MW",660,740]],0],["20189","GER102","","Elementary German",[["C","MWF",525,590]],0],["20191","GER202","","Intermediate German",[["C","TR",600,680]],0],["20640","GER323","","Reading Berlin, 1920/2020",[["C","MW",660,740]],0],["20294","GOV101","A","Power and Politics",[["C","MW",660,740]],0],["20296","GOV101","B","Power and Politics",[["C","MW",780,860]],0],["20324","GOV101","C","Power and Politics",[["C","TR",600,680]],0],["20335","GOV200","A","Understanding Public Policy",[["C","TR",855,935]],0],["20336","GOV200","B","Understanding Public Policy",[["C","TR",1005,1085]],0],["20634","GOV230","","International Security",[["C","TR",765,845]],0],["20276","GOV250","A","Political Research",[["C","MW",660,740]],0],["20295","GOV250","B","Political Research",[["C","MW",780,860]],0],["20316","GOV275","","Politics of Terrorism",[["C","MW",870,950]],0],["20623","GOV279","","Global Democracy Lab",[["C","TR",765,845]],0],["20333","GOV305","","Public Policy Implementation",[["C","TR",600,680]],0],["20635","GOV312","","A F&M in Harrisburg Practicum",[["C","M",900,980]],0],["20636","GOV312","","B F&M in Harrisburg Practicum",[["C","T",855,935]],0],["20332","GOV315","A","Civil Rights & Civil Liberties",[["C","TR",855,935]],0],["20669","GOV315","B","Civil Rights & Civil Liberties",[["C","TR",1005,1085]],0],["20083","GOV319","","Making Sense of Putin's Russia",[["C","MW",780,860]],0],["20141","GOV320","","Internationl Environmental Law",[["C","TR",600,680]],0],["20284","GOV358","","Rights and Representations",[["C","WF",510,590]],0],["20563","GOV370","","LGBT+ Human Rights in Chg Wrld",[["C","T",810,980]],0],["20671","GOV373","","Theories of Law and Punishment",[["C","TR",510,590]],0],["20666","GOV375","","Law of Sports",[["C","R",810,980]],0],["20337","GOV379","","East/West & Decolonial Theory",[["C","T",1170,1340]],0],["20235","GOV380","A","Health Policy",[["C","TR",510,590]],0],["20236","GOV380","B","Health Policy",[["C","TR",600,680]],0],["20328","GOV411","","Presidential Character",[["C","T",810,980]],0],["20329","GOV425","","Human Rights/Human Wrongs",[["C","W",810,980]],0],["20060","HIS122","","Europe in 20th Century World",[["C","MWF",600,650]],0],["20063","HIS128","","Modern Middle East",[["C","TR",765,845]],0],["20574","HIS131","","History of Colonial Latin Amer",[["C","MW",660,740]],0],["20065","HIS137","","American History, 1491-1865 Del",[["C","MWF",750,800]],0],["20066","HIS138","","U.S. and the Modern World Del",[["C","MWF",810,860]],0],["20067","HIS142","","Hist of East & Southern Africa",[["C","MWF",930,980]],0],["20609","HIS223","","Democracy and Fascism",[["C","MW",870,950]],0],["20570","HIS224","","The Age of Enlightenment",[["C","MW",900,980]],0],["20072","HIS260","","History Workshop",[["C","TR",510,590]],0],["20077","HIS275","","Nazi Germany",[["C","MWF",540,590]],0],["20290","HIS279","","The Urban Citizen (CBL)",[["C","TR",765,845]],0],["20079","HIS312","","N. American Environ History",[["C","TR",765,845]],0],["20082","HIS319","","Making Sense of Putin's Russia",[["C","MW",780,860]],0],["20086","HIS372","","20th Century US Business",[["C","MW",660,740]],0],["20564","HIS373","","American Communities",[["C","TR",600,680]],0],["20087","HIS374","","Urban Life in the Middle East",[["C","TR",600,680]],0],["20655","HIS475","","Global Reproductive Politics",[["C","R",810,980]],0],["20660","INT140","","Mindfulness,Meaning &Wellbeing",[["C","TR",855,935]],0],["20600","INT178","","Leadership",[["C","WF",660,740]],0],["20657","INT272","","Migration in Lancaster",[],0],["20118","INT365","","Entrepreneurial Discovery",[["C","WF",780,860]],0],["20274","IST200","","Intro to International Studies",[["C","MWF",600,650]],0],["20610","IST223","","Democracy and Fascism",[["C","MW",870,950]],0],["20084","IST319","","Making Sense of Putin's Russia",[["C","MW",780,860]],0],["20038","IST350","","International Business",[["C","MW",870,950]],0],["20202","ITA102","A","Elementary Italian",[["C","MWF",525,590]],0],["20203","ITA102","B","Elementary Italian",[["C","MWF",735,800]],0],["20204","ITA202","","Inter Italian Lang & Cult",[["C","MWF",660,710]],0],["20196","JPN102","","Elementary Japanese",[["C","MWF",540,590]],0],["20197","JPN202","","Intermediate Japanese",[["C","MWF",600,650]],0],["20198","JPN221","","Intro to Japanese Pop Culture",[["C","MW",870,950]],0],["20585","JST101","","Elem Modern Hebrew I Di",[["C","MWF",600,650]],0],["20612","JST112","","Judaism",[["C","MW",660,740]],0],["20631","JST173","","Religion and the Senses",[["C","TR",855,935]],0],["20632","JST174","","Antisemitism & Visual Culture",[["C","TR",765,845]],0],["20280","MUS239","","HipHop: Globl Poltcs of Cultur",[["C","TR",510,590]],0],["20271","PBH366","","Race, Ethnicity, and Health",[["C","TR",600,680]],0],["20270","SOC366","","Race, Ethnicity, and Health",[["C","TR",600,680]],0],["20133","STS244","","Indigenous Environmntl Justice",[["C","TR",765,845]],0],["20282","TND239","","HipHop: Globl Poltcs of Cultur",[["C","TR",510,590]],0],["20281","WGS239","","HipHop: Globl Poltcs of Cultur",[["C","TR",510,590]],0],["20656","WGS475","","Global Reproductive Politics",[["C","R",810,980]],0],["20641","LIN120","","Sociolinguistics",[["C","MW",660,740]],0],["20364","LIN207","","Psycholinguistics",[["C","MW",870,950]],0],["20614","LIT101","","Reading Beyond Borders Faleschini",[["C","TR",765,845]],0],["20154","LIT230","","Classical Myth",[["C","MW",660,740]],0],["20310","LIT253","","Epic and Romance",[["C","TR",600,680]],0],["20318","LIT371","","Indig/Colonial Entanglements",[["C","TR",855,935]],0],["20321","LIT494","","Contemporary Indian Literature",[["C","W",810,980]],0],["20107","MAT211","","Intro to Higher Mathematics",[["C","MWF",735,800]],0],["20114","MAT331","","Introduction to Analysis",[["C","TR",510,590]],0],["20117","MAT337","","CBL: Math for Optimization",[["C","MW",510,590]],0],["20115","MAT372","","Origami Math",[["C","MWF",795,860]],0],["20178","MAT471","","Shape of Space",[["C","MWF",600,650]],0],["20387","MUS163","","Introduction to Singing",[["C","MW",600,650]],0],["20389","MUS205","","Songwriting",[["C","TR",600,680]],0],["20390","MUS220","","Anthropology of Music",[["C","T",810,980]],0],["20391","MUS225","","Musicianship",[["C","MW",540,590]],0],["20675","MUS240","","Conducting",[["C","TR",855,935]],0],["20680","MUS270","","The Genius of Improvisation",[["C","M",810,980]],0],["20393","MUS278","","Music in the 19th Century",[["C","MW",870,950]],0],["20674","MUS310","","Song Cycles & Concept Albums",[["C","MW",660,740]],0],["20679","MUS340","","Advanced Conducting",[["C","TR",855,935]],0],["20450","MUS150","","College Chorus",[["C","TR",1155,1245]],0],["20451","MUS151","","Chamber Singers",[["C","MW",990,1080]],0],["20452","MUS152","","Orchestra",[["C","MW",1140,1230]],0],["20453","MUS153","","Symphonic Wind Ensemble",[["C","TR",1005,1095]],0],["20454","MUS156","A","Chamber Music",[],0],["20455","MUS156","B","Chamber Music",[],0],["20456","MUS156","C","Chamber Music",[],0],["20457","MUS156","D","Chamber Music",[],0],["20458","MUS250","","College Chorus",[["C","TR",1155,1245]],0],["20459","MUS251","","Chamber Singers",[["C","MW",990,1080]],0],["20460","MUS252","","Orchestra",[["C","MW",1140,1230]],0],["20462","MUS253","","Symphonic Wind Ensemble",[["C","TR",1005,1095]],0],["20463","MUS256","A","Chamber Music",[],0],["20464","MUS256","B","Chamber Music",[],0],["20465","MUS256","C","Chamber Music",[],0],["20466","MUS256","D","Chamber Music",[],0],["20467","MUS352","","Orchestra",[["C","MW",1140,1230]],0],["20468","MUS353","","Symphonic Wind Ensemble",[["C","TR",1005,1095]],0],["20469","MUS452","","Orchestra",[["C","MW",1140,1230]],0],["20470","MUS453","","Symphonic Wind Ensemble",[["C","TR",1005,1095]],0],["20471","MUS180","A1","Flute 1",[],0],["20472","MUS180","A2","Flute 2",[],0],["20473","MUS180","B1","Oboe 1",[],0],["20474","MUS180","B2","Oboe 2",[],0],["20476","MUS180","C1","Bassoon 1 Perm Buchar",[],0],["20477","MUS180","C2","Bassoon 2 Perm Buchar",[],0],["20478","MUS180","D1","Clarinet 1",[],0],["20479","MUS180","D2","Clarinet 2",[],0],["20480","MUS180","E1","Saxophone 1",[],0],["20481","MUS180","E2","Saxophone 2",[],0],["20482","MUS181","A1","Trumpet 1 Perm Umble",[],0],["20483","MUS181","A2","Trumpet 2 Perm Umble",[],0],["20484","MUS181","B1","Horn 1",[],0],["20485","MUS181","B2","Horn 2",[],0],["20486","MUS181","C1","Low Brass 1",[],0],["20487","MUS181","C2","Low Brass 2",[],0],["20488","MUS182","A1","Violin 1",[],0],["20489","MUS182","A2","Violin 2",[],0],["20490","MUS182","B1","Viola 1",[],0],["20491","MUS182","B2","Viola 2",[],0],["20492","MUS182","C1","Cello 1",[],0],["20493","MUS182","C2","Cello 2",[],0],["20494","MUS182","D1","Double Bass 1",[],0],["20495","MUS182","D2","Double Bass 2",[],0],["20496","MUS183","A1","Percussion 1",[],0],["20497","MUS183","A2","Percussion 2",[],0],["20498","MUS183","B1","African Drumming 1",[],0],["20499","MUS183","B2","African Drumming 2",[],0],["20500","MUS183","C1","Beginning Percussion 1",[],0],["20501","MUS183","C2","Beginning Percussion 2",[],0],["20502","MUS183","D1","Drum Set 1",[],0],["20503","MUS183","D2","Drum Set 2",[],0],["20504","MUS184","A1","Piano 1",[],0],["20505","MUS184","A2","Piano 2",[],0],["20506","MUS184","B1","Piano 1",[],0],["20507","MUS184","B2","Piano 2",[],0],["20508","MUS184","C1","Jazz Piano & Improv I",[],0],["20509","MUS184","C2","Jazz Piano & Improv 2",[],0],["20510","MUS184","D1","Organ 1",[],0],["20511","MUS184","D2","Organ 2",[],0],["20512","MUS185","A1","Voice 1",[],0],["20513","MUS185","A2","Voice 2",[],0],["20514","MUS185","B1","Voice 1",[],0],["20515","MUS185","B2","Voice 2",[],0],["20516","MUS186","1","Guitar 1",[],0],["20517","MUS186","2","Guitar 2",[],0],["20518","MUS280","A","Flute",[],0],["20519","MUS280","B","Oboe",[],0],["20520","MUS280","C","Bassoon Perm Buchar",[],0],["20521","MUS280","D","Clarinet",[],0],["20522","MUS280","E","Saxophone",[],0],["20523","MUS281","A","Trumpet Perm Umble",[],0],["20524","MUS281","B","Horn",[],0],["20525","MUS281","C","Low Brass",[],0],["20526","MUS282","A","Violin",[],0],["20527","MUS282","B","Viola",[],0],["20528","MUS282","C","Cello",[],0],["20529","MUS282","D","Double Bass",[],0],["20530","MUS283","A","Percussion",[],0],["20531","MUS283","B","African Drumming",[],0],["20532","MUS283","C","Beginning Percussion",[],0],["20533","MUS283","D","Drum Set",[],0],["20534","MUS284","A","Piano",[],0],["20535","MUS284","B","Piano",[],0],["20536","MUS284","C","Jazz Piano & Improv",[],0],["20537","MUS284","D","Organ",[],0],["20538","MUS285","A","Voice",[],0],["20539","MUS285","B","Voice",[],0],["20540","MUS286","","Guitar",[],0],["20602","NSP118","","Water, Life & Society",[["C","MWF",600,650]],0],["20560","NSP365","","Occult Science & Pseudoscience",[["C","TR",1170,1250]],0],["20616","PBH222","","Narratives of Disability",[["C","TR",765,845]],0],["20229","PBH251","A","Intro to Public Health",[["C","MWF",600,650]],0],["20230","PBH251","B","Intro to Public Health",[["C","MWF",660,710]],0],["20567","PBH271","","Architecture and Health",[["C","MW",780,860]],0],["20231","PBH354","","Epidemiology",[["C","MW",510,590],["L","W",750,980]],0],["20268","PBH367","","Social Inequality and Health",[["C","MW",660,740]],0],["20233","PBH380","A","Health Policy",[["C","TR",510,590]],0],["20234","PBH380","B","Health Policy",[["C","TR",600,680]],0],["20238","PBH418","","PHR: Tobacco,Nicotine&ECigs",[["C","MW",780,860]],0],["20237","PBH448","","Public Health Practice Seminar",[["C","T",810,980]],0],["20341","PHI100","A","Introduction to Philosophy",[["C","TR",855,935]],0],["20342","PHI100","B","Introduction to Philosophy",[["C","TR",510,590]],0],["20625","PHI176","","Topics in AI and Philosophy",[["C","TR",600,680]],0],["20344","PHI220","","Moral Theory",[["C","W",1170,1340]],0],["20629","PHI236","","Language, Knowledge & Reality",[["C","TR",510,590]],0],["20345","PHI250","","Philosophy of Mind",[["C","WF",510,590]],0],["20346","PHI274","","Political Philosophy",[["C","TR",600,680]],0],["20340","PHI301","","Current Work in Philosophy",[["C","WF",870,950]],0],["20348","PHI319","","20th Century Continental Phil",[["C","TR",765,845]],0],["20349","PHI363","","Respect, Responsibility&Ethics",[["C","WF",780,860]],0],["20292","PHI372","","Fem Phil of Cognitive Science",[["C","TR",765,845]],0],["20628","PHI374","","Process and Product",[["C","M",1170,1340]],0],["20175","AST101","","Exploring Ideas in Astronomy",[["C","TR",765,845]],0],["20176","AST121","","Introduction to Astrophysics",[["C","MWF",750,800],["L","M",1170,1340]],0],["20177","AST322","","Stellar Astrophysics",[["C","MWF",750,800]],0],["20171","PHY226","","Classical Mechanics",[["C","MWF",525,590],["L","W",810,980]],0],["20173","PHY324","","Expermntl Design & Communicatn",[["C","TR",600,680],["L","M",810,980]],0],["20174","PHY344","","Quantum",[["C","MWF",660,725]],0],["20240","PSY100","A","Introductory Psychology",[["C","WF",510,590]],0],["20241","PSY100","B","Introductory Psychology",[["C","WF",660,740]],0],["20242","PSY100","A1","Introductory Psychology Lab",[["L","T",810,980]],1],["20243","PSY100","B2","Introductory Psychology Lab",[["L","W",810,980]],1],["20244","PSY100","C3","Introductory Psychology Lab",[["L","R",810,980]],1],["20245","PSY100","D4","LAB",[["C","F",810,980]],0],["20248","PSY205","","Health Psychology",[["C","MWF",660,710]],0],["20365","PSY207","","Psycholinguistics",[["C","MW",870,950]],0],["20250","PSY278","","Psychology of Ideology",[["C","MW",510,590]],0],["20608","PSY358","","Cognitive Psychology w/Lab",[["C","TR",855,935],["L","M",810,980]],0],["20255","PSY372","","Fem Phil of Cognitive Science",[["C","TR",765,845]],0],["20256","PSY450","","Cognitive Development",[["C","WF",660,740]],0],["20257","PSY451","","CBL: Applied Psychol Science",[["C","MW",510,590],["L","M",810,980]],0],["20647","WGS370","","LGBT+ Human Rights in Chg Wrld",[["C","T",810,980]],0],["20613","RST112","","Judaism",[["C","MW",660,740]],0],["20396","RST114","A","Islam",[["C","M",810,980]],0],["20397","RST114","B","Islam",[["C","W",810,980]],0],["20398","RST122","","Asian Religions",[["C","TR",600,680]],0],["20686","RST272","","Christian Nationalism in",[["C","M",1170,1340]],0],["20638","RST273","","Religion and Non-Violence",[["C","T",810,980]],0],["20639","RST274","","Psych of Religious Experience",[["C","R",810,980]],0],["20552","RST277","","The Right to Die Movement",[["C","MW",780,860]],0],["20545","RST279","","Religion and Film",[["C","T",1170,1340]],0],["20403","RST336","","Hindus and Muslims",[["C","MW",660,740]],0],["20399","RST367","","Self, Society & Nature",[["C","R",810,980]],0],["20085","RUS319","","Making Sense of Putin's Russia",[["C","MW",780,860]],0],["20264","SOC100","A","Intro to Sociology",[["C","MWF",600,650]],0],["20265","SOC100","B","Intro to Sociology",[["C","MWF",750,800]],0],["20266","SOC100","C","Intro to Sociology",[["C","MW",870,950]],0],["20650","SOC100","D","Intro to Sociology",[["C","TR",510,590]],0],["20683","SOC100","E","Intro to Sociology",[["C","TR",765,845]],0],["20684","SOC100","F","Intro to Sociology",[["C","TR",855,935]],0],["20263","SOC301","","Hist of Sociological Theory",[["C","MW",510,590]],0],["20272","SOC342","","Power and Resistance",[["C","TR",765,845]],0],["20269","SOC355","","Cultural Sociology",[["C","MW",780,860]],0],["20267","SOC367","","Social Inequality and Health",[["C","MW",660,740]],0],["20649","SOC379","","The 21st Century Workplace",[["C","TR",855,935]],0],["20350","SPA102","A","Beginning Spanish",[["C","MWF",480,530]],0],["20351","SPA102","B","Beginning Spanish",[["C","MWF",600,650]],0],["20352","SPA102","C","Beginning Spanish",[["C","MWF",750,800]],0],["20672","SPA102","D","Beginning Spanish",[["C","MWF",480,530]],0],["20353","SPA201","A","Intermediate Spanish I",[["C","MWF",540,590]],0],["20354","SPA201","B","Intermediate Spanish I Rodriguez",[["C","MWF",600,650]],0],["20355","SPA201","C","Intermediate Spanish I Rodriguez",[["C","MWF",750,800]],0],["20673","SPA201","D","Intermediate Spanish I",[["C","TR",510,590]],0],["20356","SPA202","","Intermediate Spanish II Rodriguez",[["C","MWF",810,860]],0],["20392","SPA226","","Marco/Frame Aldea",[["C","TR",510,590]],0],["20358","SPA241","","Caleidoscopio Caamano",[["C","TR",855,935]],0],["20359","SPA301","","Spanish Grammar",[["C","MW",510,590]],0],["20550","SPA321","","Miradas cr\u00edticas",[["C","MW",660,740]],0],["20360","SPA374","","Espa\u00f1a en pantalla Aldea",[["C","TR",600,680]],0],["20361","SPA425","","Mujeres nuevas, viejas ideas",[["C","TR",600,680]],0],["20261","SPM100","","Minds, Machines, and Morals",[["C","TR",855,935]],0],["20293","WGS372","","Fem Phil of Cognitive Science",[["C","TR",765,845]],0],["20091","STS117","A","Environment and Human Values",[["C","MW",660,740]],0],["20093","STS117","B","Environment and Human Values",[["C","TR",600,680]],0],["20617","STS222","","Narratives of Disability",[["C","TR",765,845]],0],["20572","STS224","","The Age of Enlightenment",[["C","MW",900,980]],0],["20081","STS312","","N. American Environ History",[["C","TR",765,845]],0],["20559","STS365","","Occult Science & Pseudoscience",[["C","TR",1170,1250]],0],["20549","STS367","","Social Inequality and Health",[["C","MW",660,740]],0],["20407","TND117","","Introduction to Ballet",[["C","MW",780,890]],0],["20408","TND118","","Hip Hop: Movement and Culture",[["C","F",810,980]],0],["20409","TND122","","Technical Theatre Practicum",[["C","WF",780,860]],0],["20410","TND185","","Production Studio I",[["C","MTWR",1140,1320],["L","F",810,980]],0],["20413","TND200","","Dance Company",[],0],["20414","TND201","","Dance Company",[],0],["20415","TND225","","Costume Design",[["C","TR",600,680]],0],["20417","TND251","","Modern & Contemp Amer Drama",[["C","MW",660,740]],0],["20419","TND270","","Digitl Renderng for Entertnmnt",[["C","TR",600,680]],0],["20630","TND271","","Student New Works Festival",[["C","F",810,980],["C","MTWR",1140,1320]],0],["20643","TND272","","Theatre for Social Change",[["C","TR",765,845]],0],["20412","TND278","","Embodying Ritual, Myth &Magick",[["C","MW",570,650]],0],["20642","TND285","","Acting IId:Devised Performance",[["C","MW",660,740]],0],["20591","TND287","","Acting IIa: Shakespeare",[["C","TR",765,845]],0],["20422","TND331","","Hist of Western Theatre Dance",[["C","TR",570,680]],0],["20423","TND383","","Playwriting",[["C","M",810,980]],0],["20425","TND385","","Production Studio II",[["C","MTWR",1140,1320],["L","F",810,980]],0],["20426","TND387","","Writing for Television",[["C","W",810,980]],0],["20275","WGS210","","Gender, Sexuality, and Power",[["C","MWF",600,650]],0],["20618","WGS222","","Narratives of Disability",[["C","TR",765,845]],0],["20573","WGS224","","The Age of Enlightenment",[["C","MW",900,980]],0],["20645","WGS272","","Theatre for Social Change",[["C","TR",765,845]],0],["20662","WGS274","","Nerd Problems: Race and Fandom",[["C","TR",855,935]],0],["20367","WGS277","","Romance & Politics of Pleasure",[["C","MW",900,980]],0],["20291","WGS279","","The Urban Citizen (CBL)",[["C","TR",765,845]],0],["20547","WGS315","A","Civil Rights & Civil Liberties",[["C","TR",855,935]],0],["20670","WGS315","B","Civil Rights & Civil Liberties",[["C","TR",1005,1085]],0],["20285","WGS358","","Rights and Representations",[["C","WF",510,590]],0],["20369","WGS373","","American Communities",[["C","TR",600,680]],0],["20362","WGS425","","Mujeres nuevas, viejas ideas",[["C","TR",600,680]],0],["20371","WGS474","","Selling Sex",[["C","WF",780,860]],0],["20078","GST275","","Nazi Germany",[],0]];
+const FULL = {"20575":1,"20620":1,"20279":1,"20548":1,"20278":1,"20418":1,"20659":1,"20694":0,"20131":1,"20695":0,"20430":1,"20416":1,"20420":1,"20711":0,"20703":0,"20715":0,"20710":0,"20724":0,"20010":1,"20012":1,"20013":1,"20015":0,"20017":1,"20587":1,"20019":1,"20232":1,"20143":0,"20698":0,"20704":0,"20722":0,"20728":0,"20033":1,"20034":1,"20035":1,"20036":1,"20037":1,"20039":1,"20040":1,"20041":1,"20667":1,"20042":1,"20043":1,"20054":1,"20055":1,"20056":1,"20058":1,"20706":0,"20726":0,"20194":1,"20321":1,"20374":1,"20375":1,"20376":1,"20378":1,"20130":1,"20136":1,"20059":1,"20080":1,"20142":0,"20145":0,"20697":0,"20709":0,"20716":0,"20730":0,"20596":1,"20217":1,"20218":1,"20219":1,"20220":1,"20221":1,"20222":1,"20224":1,"20595":1,"20696":0,"20424":1,"20702":0,"20335":1,"20316":1,"20083":1,"20141":1,"20671":1,"20666":1,"20236":1,"20727":0,"20328":1,"20329":1,"20717":0,"20677":1,"20082":1,"20087":1,"20655":1,"20543":1,"20681":1,"20084":1,"20038":1,"20108":1,"20562":1,"20114":1,"20678":1,"20560":1,"20148":0,"20159":1,"20160":0,"20161":0,"20162":0,"20247":1,"20248":1,"20365":1,"20249":1,"20577":1,"20250":1,"20252":0,"20254":1,"20565":0,"20608":1,"20256":1,"20712":0,"20713":0,"20720":0,"20271":1,"20708":0,"20085":1,"20617":1,"20676":1,"20559":1,"20549":1,"20354":1,"20725":0,"20361":1,"20721":0,"20282":1,"20417":1,"20618":0,"20579":1}; // crn -> 1 if it has a waitlist (snapshot Nov 5 2026)
+const TERM = '202620', MAXH = 4.5, TARGET = 20;
+const C = {};           // crn -> course obj
+const byCourse = {};    // course code -> [crn objs]
+for (const [crn, course, sect, title, meets, labOnly] of RAW) {
+  const o = {crn, course, sect, title, meets: meets.map(([t,d,s,e]) => ({t,d,s,e})), labOnly: !!labOnly};
+  o.subj = course.replace(/\d.*$/, ''); o.num = course.replace(/^[A-Z]+/, '');
+  o.hours = labOnly ? 0 : 1;
+  C[crn] = o; (byCourse[course] ||= []).push(o);
+}
+const needsLab = o => !o.labOnly && (byCourse[o.course] || []).some(x => x.labOnly);
+const $ = id => document.getElementById(id);
+
+let state;
+function freshState() {
+  return {screen: 1, t0: null, tEnd: null, summary: [], full: new Map()};
+}
+// summary row: {crn, status:'pending'|'registered'|'error', action:'Web Register'|'Remove'|'None'|'Drop', err}
+
+/* ---------- stopwatch ---------- */
+let raf = null;
+function tick() {
+  const w = $('watch');
+  if (state.t0 && !state.tEnd) { w.textContent = ((performance.now() - state.t0)/1000).toFixed(1) + 's'; raf = requestAnimationFrame(tick); }
+}
+function startWatch() { state.t0 = performance.now(); $('watch').className = 'watch run'; cancelAnimationFrame(raf); tick(); }
+function stopWatch() {
+  state.tEnd = performance.now(); cancelAnimationFrame(raf);
+  const s = (state.tEnd - state.t0)/1000; $('watch').textContent = s.toFixed(1)+'s'; $('watch').className='watch done'; return s;
+}
+function getBest(){ try { const v = parseFloat(localStorage.getItem('regPracticeBest')); return isNaN(v)?null:v; } catch(e){ return null; } }
+function setBest(v){ try { localStorage.setItem('regPracticeBest', String(v)); } catch(e){} }
+function showBest(){ const b=getBest(); $('bestLbl').textContent = b!=null ? 'Your best: '+b.toFixed(1)+'s' : ''; }
+
+/* ---------- screens ---------- */
+function setHeader() {
+  if (state.screen === 1) {
+    $('crumbs').innerHTML = '<a>Student</a><span class="sep"></span><a>Registration</a><span class="sep"></span><span class="cur">Select a Term</span>';
+    $('h1').textContent = 'Select a Term';
+  } else {
+    $('crumbs').innerHTML = '<a>Student</a><span class="sep"></span><a>Registration</a><span class="sep"></span><a>Select a Term</a><span class="sep"></span><span class="cur">Register for Classes</span>';
+    $('h1').textContent = 'Register for Classes';
+  }
+}
+function go(screen) {
+  state.screen = screen; setHeader();
+  $('s1').classList.toggle('hidden', screen!==1);
+  $('s2').classList.toggle('hidden', screen!==2);
+  $('divider').classList.toggle('hidden', screen!==2);
+  $('footer').classList.toggle('hidden', screen!==2);
+  if (screen!==2) $('bottom').classList.remove('open');
+}
+
+$('termForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if (state.t0) return;
+  if (!$('termSel').value) { $('termErr').classList.remove('hidden'); return; }
+  if (!$('pin').value) { $('pinErr').classList.remove('hidden'); return; }
+  $('pin').value = '';
+  $('pinErr').classList.add('hidden');
+  startWatch();
+  $('contBtn').disabled = true;
+  const rush = $('optRush').checked;
+  const wait = rush ? 3200 + Math.random()*1800 : 600;
+  setTimeout(() => { if (rush) $('overlay').classList.add('on'); }, 350);
+  setTimeout(() => {
+    $('overlay').classList.remove('on'); $('contBtn').disabled = false;
+    pickFull();
+    go(2); selectTab('find'); resetCrnRows(); renderSummary();
+  }, wait);
+});
+
+function pickFull() {
+  state.full = new Map();
+  if ($('optReal').checked) for (const [c,w] of Object.entries(FULL)) if (C[c]) state.full.set(c, !!w);
+  if ($('optFull').checked) for (const list of Object.values(byCourse)) {
+    if (list.filter(x=>!x.labOnly).length < 2) continue;
+    for (const o of list) if (!o.labOnly && Math.random() < .25) state.full.set(o.crn, true);
+  }
+}
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => selectTab(b.dataset.tab)));
+function selectTab(t) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab===t));
+  for (const k of ['find','crn','opts']) $('tab-'+k).classList.toggle('hidden', k!==t);
+  if (t==='crn') { const first = $('crnRows').querySelector('input'); if (first) first.focus(); }
+}
+
+/* ---------- enter CRNs ---------- */
+function resetCrnRows(){ $('crnRows').innerHTML=''; addCrnRow(false); }
+function addCrnRow(focus) {
+  const row = document.createElement('div'); row.className='crnrow';
+  row.innerHTML = '<span class="lbl">CRN</span><input maxlength="5" inputmode="numeric" autocomplete="off"><span class="msg"></span>';
+  $('crnRows').appendChild(row);
+  const inp = row.querySelector('input');
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Tab' && !e.shiftKey) {
+      checkRow(row);
+      const rows = [...$('crnRows').children];
+      if (rows[rows.length-1] === row && inp.value.trim()) addCrnRow(false); // new box appears; Tab lands in it
+    }
+    if (e.key === 'Enter') { e.preventDefault(); checkRow(row); addToSummary(); }
+  });
+  inp.addEventListener('blur', () => checkRow(row));
+  if (focus) inp.focus();
+  return row;
+}
+function checkRow(row) {
+  const inp = row.querySelector('input'), msg = row.querySelector('.msg');
+  const v = inp.value.trim();
+  inp.classList.remove('bad'); msg.className='msg'; msg.textContent='';
+  if (!v) return null;
+  const o = C[v];
+  if (!o) { inp.classList.add('bad'); msg.className='msg bad'; msg.textContent = '⚠ CRN '+v+' is not valid for term '+TERM+'.'; return null; }
+  msg.className='msg ok'; msg.textContent = o.title + ' (' + o.course + (o.sect?' '+o.sect:'') + ')';
+  return o;
+}
+$('addCrn').addEventListener('click', e => { e.preventDefault(); addCrnRow(true); });
+$('addSum').addEventListener('click', addToSummary);
+
+function addToSummary() {
+  let added = 0, anyBad = false;
+  for (const row of [...$('crnRows').children]) {
+    const v = row.querySelector('input').value.trim();
+    if (!v) continue;
+    const o = checkRow(row);
+    if (!o) { anyBad = true; continue; }
+    if (!state.summary.some(r => r.crn===o.crn)) { state.summary.push({crn:o.crn, status:'pending', action:'Web Register'}); added++; }
+  }
+  if (!anyBad) resetCrnRows();
+  if (added) { openPanel(true); renderSummary(); }
+  else if (anyBad) note('Fix the red CRNs before adding to summary.');
+}
+
+/* ---------- find classes ---------- */
+$('searchForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const sub=$('qSub').value.trim().toUpperCase(), num=$('qNum').value.trim(), key=$('qKey').value.trim().toLowerCase();
+  if (!sub && !num && !key) { $('results').innerHTML='<p class="small">Enter a subject, course number or keyword.</p>'; return; }
+  const list = Object.values(C).filter(o => (!sub || o.subj===sub) && (!num || o.num.startsWith(num)) && (!key || o.title.toLowerCase().includes(key))).slice(0,80);
+  $('results').innerHTML = list.length ? '<table class="results"><tr><th>CRN</th><th>Course</th><th>Title</th><th>Meets</th><th></th></tr>' +
+    list.map(o => `<tr><td>${o.crn}</td><td>${o.course}${o.sect?' '+o.sect:''}</td><td>${esc(o.title)}${state.full.has(o.crn)?' <b style="color:#d42828">FULL'+(state.full.get(o.crn)?' (waitlist open)':'')+'</b>':''}</td><td>${meetStr(o)}</td><td><button class="btn" style="padding:2px 10px" data-add="${o.crn}">Add</button></td></tr>`).join('') + '</table>' : '<p class="small">No classes found.</p>';
+});
+$('results').addEventListener('click', e => {
+  const c = e.target.dataset.add; if (!c) return;
+  if (!state.summary.some(r=>r.crn===c)) state.summary.push({crn:c,status:'pending',action:'Web Register'});
+  openPanel(true); renderSummary();
+});
+$('qClear').addEventListener('click', e => { e.preventDefault(); ['qSub','qNum','qKey'].forEach(i=>$(i).value=''); $('results').innerHTML=''; });
+
+/* ---------- panel + summary ---------- */
+function openPanel(open){ $('bottom').classList.toggle('open', open); }
+$('pUp').addEventListener('click', () => openPanel(true));
+$('pDown').addEventListener('click', () => openPanel(false));
+
+function fmt(m){ let h=Math.floor(m/60), mm=m%60, ap=h>=12?'PM':'AM'; h=h%12||12; return h+':'+String(mm).padStart(2,'0')+' '+ap; }
+function meetStr(o){ return o.meets.length ? o.meets.map(m=>`${m.d} ${fmt(m.s)}–${fmt(m.e)}${m.t==='L'?' (lab)':''}`).join('; ') : 'TBA'; }
+function esc(s){ return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+const COLORS = ['#a5d48d','#7fb2e5','#c39be0','#f2c26b','#8fd3c8','#f09a9a','#b8c96a','#e3a4c8'];
+function courseColor(course){ let h=0; for (const ch of course) h=(h*31+ch.charCodeAt(0))>>>0; return COLORS[h%COLORS.length]; }
+const fmtCourse = o => o.course.replace(/(\d)/,' $1') + ', ' + (o.sect||'0');
+
+function renderSummary() {
+  const body = $('sumBody'); body.innerHTML='';
+  for (const r of state.summary) {
+    const o = C[r.crn], tr = document.createElement('tr');
+    tr.className = r.status==='error' ? 'errrow' : r.status==='pending' ? 'penrow' : '';
+    const st = r.status==='registered' ? '<span class="st reg">Registered</span>'
+             : r.status==='waitlisted' ? '<span class="st wl">Waitlisted</span>'
+             : r.status==='pending' ? '<span class="st pen">Pending</span>'
+             : `<span class="st err" title="${esc(r.err)}">Errors Preventing Registration</span>`;
+    let opts;
+    if (r.status==='registered' || r.status==='waitlisted') opts = ['None','Drop'];
+    else if (r.status==='error') opts = ['Remove','Register'].concat(r.canWait ? ['Waitlist'] : []);
+    else opts = ['Web Register','Remove'];
+    tr.innerHTML = `<td>${o.crn}</td><td>${fmtCourse(o)}</td><td class="ttl" title="${esc(o.title)}">${esc(o.title)}</td><td>${o.hours}</td><td>${o.labOnly?'Lab':'Lecture'}</td><td>${st}</td><td><select class="act">${opts.map(x=>`<option${x===r.action?' selected':''}>${x}</option>`).join('')}</select></td>`;
+    tr.querySelector('select').addEventListener('change', e => { r.action = e.target.value; updateSubmit(); });
+    body.appendChild(tr);
+  }
+  $('sumTab').classList.toggle('haserr', state.summary.some(r=>r.status==='error'));
+  const reg = state.summary.filter(r=>r.status==='registered').reduce((a,r)=>a+C[r.crn].hours,0);
+  $('sumFoot').innerHTML = `Total Hours <span>|</span> <b>Registered:</b> ${reg} <span>|</span> <b>Billing:</b> ${reg} <span>|</span> <b>CEU:</b> 0 <span>|</span> <b>Min:</b> 0 <span>|</span> <b>Max:</b> ${MAXH}`;
+  renderGrid(); updateSubmit();
+}
+const wantsAdd = r => r.status!=='registered' && r.status!=='waitlisted' && ['Web Register','Register','Waitlist'].includes(r.action);
+function updateSubmit() {
+  $('submitBtn').disabled = !state.summary.some(r => wantsAdd(r) || (r.status!=='registered' && r.status!=='waitlisted' && r.action==='Remove') || ((r.status==='registered'||r.status==='waitlisted') && r.action==='Drop'));
+}
+
+function renderGrid() {
+  const days = ['U','M','T','W','R','F','S'], names=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const startH = 7, endH = 22, rowPx = 42;
+  let h = '<table><tr><th style="width:50px"></th>' + names.map(n=>`<th>${n}</th>`).join('') + '</tr>';
+  for (let hr=startH; hr<endH; hr++) {
+    h += `<tr><td class="hr">${(hr%12||12)+(hr<12?'am':'pm')}</td>` + days.map(d=>`<td data-d="${d}" data-h="${hr}"></td>`).join('') + '</tr>';
+  }
+  $('grid').innerHTML = h + '</table>';
+  for (const r of state.summary) {
+    const o = C[r.crn];
+    for (const m of o.meets) for (const d of m.d) {
+      const hr = Math.floor(m.s/60); if (hr<startH || hr>=endH) continue;
+      const cell = $('grid').querySelector(`td[data-d="${d}"][data-h="${hr}"]`); if (!cell) continue;
+      const b = document.createElement('div');
+      b.className = 'blk ' + ({registered:'reg',pending:'pen',error:'err',waitlisted:'wl'})[r.status];
+      b.style.setProperty('--bc', courseColor(o.course));
+      b.style.top = ((m.s%60)/60*rowPx)+'px'; b.style.height = ((m.e-m.s)/60*rowPx - 2)+'px';
+      b.textContent = (r.status==='registered'?'✔ ':'') + o.title + (m.t==='L'?' (Lab)':'');
+      cell.appendChild(b);
+    }
+  }
+  const g = $('grid'); g.scrollTop = 0;
+}
+
+/* ---------- submit ---------- */
+const overlaps = (a,b) => a.meets.some(m => b.meets.some(n => [...m.d].some(d => n.d.includes(d)) && m.s < n.e && n.s < m.e));
+const CLOSED_MSG = 'This section has reached its enrollment capacity;there are no more seats available. If you wish to be waitlisted, indicate that by using the Action drop-down box to the right';
+
+$('submitBtn').addEventListener('click', () => {
+  $('submitBtn').disabled = true; $('overlay').classList.add('on');
+  setTimeout(() => { $('overlay').classList.remove('on'); doSubmit(); }, 700 + Math.random()*600);
+});
+function doSubmit() {
+  clearNotes();
+  const held = r => r.status==='registered' || r.status==='waitlisted';
+  state.summary = state.summary.filter(r => !(r.action==='Remove' && !held(r)) && !(held(r) && r.action==='Drop'));
+  const reg = state.summary.filter(r=>r.status==='registered').map(r=>C[r.crn]);
+  const wl = state.summary.filter(r=>r.status==='waitlisted').map(r=>C[r.crn]);
+  const adds = state.summary.filter(wantsAdd);
+  const batch = adds.map(r=>C[r.crn]);
+  const waitReq = new Set(adds.filter(r=>r.action==='Waitlist').map(r=>r.crn));
+  const msgs = [];
+  const errs = new Map();
+  const fail = (o, m) => { if (!errs.has(o.crn)) { errs.set(o.crn, m); msgs.push(`${o.course.replace(/(\d)/,' $1')} CRN ${o.crn}: ${m}`); } };
+  const pool = reg.concat(wl, batch);
+  for (const o of batch) {
+    if (state.full.has(o.crn) && !(waitReq.has(o.crn) && state.full.get(o.crn)))
+      fail(o, state.full.get(o.crn) ? CLOSED_MSG : 'Closed Section');
+    if (needsLab(o) && !pool.some(x => x.course===o.course && x.labOnly)) fail(o, 'Registration in the Lab is also required.');
+    if (o.labOnly && !pool.some(x => x.course===o.course && !x.labOnly)) fail(o, 'Registration in the Lecture is also required.');
+    const dup = pool.find(x => x!==o && x.course===o.course && x.labOnly===o.labOnly);
+    if (dup) fail(o, 'Duplicate Course with Section ' + dup.crn);
+  }
+  // time conflicts only matter for seats you actually get
+  const accepted = [...reg];
+  for (const o of batch) {
+    if (errs.has(o.crn) || waitReq.has(o.crn)) continue;
+    const hit = accepted.find(x => overlaps(o,x));
+    if (hit) { fail(o, 'Time conflict with CRN ' + hit.crn); continue; }
+    accepted.push(o);
+  }
+  for (const o of batch) if (!errs.has(o.crn)) {
+    const partners = batch.filter(x => x.course===o.course && x.labOnly!==o.labOnly);
+    const regPartner = reg.concat(wl).some(x => x.course===o.course && x.labOnly!==o.labOnly);
+    if ((needsLab(o) || o.labOnly) && !regPartner && partners.length && partners.every(p => errs.has(p.crn)))
+      fail(o, o.labOnly ? 'Registration in the Lecture is also required.' : 'Registration in the Lab is also required.');
+  }
+  let hrs = reg.reduce((a,x)=>a+x.hours,0);
+  for (const o of batch) if (!errs.has(o.crn) && !waitReq.has(o.crn)) { if (hrs + o.hours > MAXH) fail(o, 'Maximum hours exceeded'); else hrs += o.hours; }
+
+  for (const r of adds) {
+    if (errs.has(r.crn)) { r.status='error'; r.err=errs.get(r.crn); r.action='Remove'; r.canWait = state.full.has(r.crn) && state.full.get(r.crn) && errs.get(r.crn)===CLOSED_MSG; }
+    else if (waitReq.has(r.crn)) { r.status='waitlisted'; r.action='None'; }
+    else { r.status='registered'; r.action='None'; }
+  }
+  showNotes(msgs.length ? msgs : null);
+  renderSummary();
+  const allDone = state.summary.length && state.summary.every(held);
+  const nReg = state.summary.filter(r=>r.status==='registered' && !C[r.crn].labOnly).length;
+  if (allDone && nReg >= 1 && state.t0 && !state.tEnd) finish();
+}
+function showNotes(msgs) {
+  const n = $('notes'); n.innerHTML = '';
+  if (!msgs) {
+    const d = document.createElement('div'); d.className='note ok'; d.textContent='Save Successful'; n.appendChild(d);
+    $('bell').textContent = ''; $('bell').classList.remove('on');
+    n.classList.add('on'); setTimeout(()=>{ if (n.firstChild===d) { n.classList.remove('on'); n.innerHTML=''; } }, 2500);
+    return;
+  }
+  for (const m of msgs) { const d = document.createElement('div'); d.className='note'; d.textContent=m; n.appendChild(d); }
+  $('bell').textContent = msgs.length; $('bell').classList.add('on'); n.classList.add('on');
+}
+function note(text){ showNotes([text]); }
+function clearNotes(){ $('notes').innerHTML=''; $('notes').classList.remove('on'); $('bell').classList.remove('on'); }
+$('bell').addEventListener('click', () => { if ($('notes').children.length) $('notes').classList.toggle('on'); });
+
+function finish() {
+  const s = stopWatch();
+  const best = getBest(); if (best==null || s < best) setBest(s); showBest();
+  $('doneTime').textContent = s.toFixed(1)+'s';
+  $('doneCmp').innerHTML = s <= TARGET ? `Beat Teague's <b>${TARGET}s</b> by ${(TARGET-s).toFixed(1)}s. Captain material.` : `Teague did it in <b>${TARGET}s</b> — ${(s-TARGET).toFixed(1)}s to shave off. Text replacements + Tab are the move.`;
+  $('doneBest').textContent = best!=null && s < best ? 'New personal best!' : (best!=null ? 'Your best: '+best.toFixed(1)+'s' : '');
+  $('done').classList.add('on');
+}
+$('doneClose').addEventListener('click', () => $('done').classList.remove('on'));
+$('doneAgain').addEventListener('click', restart);
+
+/* ---------- misc ---------- */
+function restart() {
+  state = freshState(); clearNotes();
+  $('done').classList.remove('on'); $('overlay').classList.remove('on');
+  $('watch').textContent = '0.0s'; $('watch').className='watch';
+  $('pin').value=''; $('contBtn').disabled=false; $('pinErr').classList.add('hidden');
+  $('termSel').value=''; $('pinBox').classList.add('hidden'); $('termErr').classList.add('hidden');
+  $('results').innerHTML=''; resetCrnRows(); renderSummary(); go(1); showBest();
+}
+$('resetBtn').addEventListener('click', restart);
+$('termSel').addEventListener('change', () => {
+  $('termErr').classList.add('hidden');
+  $('pinBox').classList.toggle('hidden', !$('termSel').value);
+  if ($('termSel').value) $('pin').focus();
+});
+$('setBtn').addEventListener('click', () => $('settings').classList.toggle('hidden'));
+document.addEventListener('click', e => { if (!e.target.closest('#settings') && !e.target.closest('#setBtn')) $('settings').classList.add('hidden'); });
+
+restart();
+</script>
+</body>
+</html>
