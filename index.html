@@ -367,7 +367,7 @@ function addCrnRow(focus) {
       const rows = [...$('crnRows').children];
       if (rows[rows.length-1] === row && inp.value.trim()) addCrnRow(false); // new box appears; Tab lands in it
     }
-    if (e.key === 'Enter') { e.preventDefault(); checkRow(row); addToSummary(); }
+    if (e.key === 'Enter') e.preventDefault(); // Enter does nothing on the real site
   });
   inp.addEventListener('blur', () => checkRow(row));
   if (focus) inp.focus();
